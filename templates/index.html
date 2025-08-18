@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Q&A with LLaMA</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+  <h1>Question & Answer System</h1>
+
+  <div class="top-controls">
+    <button id="initDbBtn">Init DB</button>
+    <input type="file" id="pdfInput" accept=".pdf" multiple hidden>
+    <button id="loadPdfBtn">Load PDF</button>
+  </div>
+
+  <textarea id="questionInput" rows="4" placeholder="Enter your question here..."></textarea>
+
+  <div class="controls">
+    <label><input type="checkbox" id="useRag"> Use RAG</label>
+    <button id="submitBtn">Submit Question</button>
+    <button id="clearBtn">Clear</button>
+  </div>
+
+  <h3>Response:</h3>
+  <div id="responseArea" class="response"></div>
+
+  <p id="statusMessage" class="status"></p>
+</div>
+
+<script>
+function showStatus(msg, success=true) {
+    const el = document.getElementById("statusMessage");
+    el.textContent = msg;
+    el.className = success ? "status success" : "status error";
+}
+
+// Init DB
+document.getElementById("initDbBtn").onclick = async () => {
+    let res = await fetch("/init_db",{method:"POST"});
+    let data = await res.json();
+    showStatus(data.message, data.success);
+}
+
+// Load PDF
+document.getElementById("loadPdfBtn").onclick = () => document.getElementById("pdfInput").click();
+document.getElementById("pdfInput").addEventListener("change", async (e)=>{
+    let form = new FormData();
+    for (let f of e.target.files) form.append("files", f);
+    let res = await fetch("/upload_pdfs",{method:"POST",body:form});
+    let data = await res.json();
+    showStatus(data.message, data.success);
+});
+
+// Ask Question
+document.getElementById("submitBtn").onclick = async ()=>{
+    const q = document.getElementById("questionInput").value.trim();
+    const useRag = document.getElementById("useRag").checked;
+    if (!q) { showStatus("Please enter a question", false); return; }
+
+    document.getElementById("responseArea").innerHTML = "⏳ Processing...";
+    let res = await fetch("/ask_question",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({question:q, use_rag:useRag})
+    });
+    let data = await res.json();
+    if (data.success){
+        document.getElementById("responseArea").textContent = data.answer;
+    } else {
+        document.getElementById("responseArea").textContent = "Error: "+data.message;
+        showStatus(data.message, false);
+    }
+}
+
+// Clear
+document.getElementById("clearBtn").onclick = ()=>{
+    document.getElementById("questionInput").value = "";
+    document.getElementById("responseArea").innerHTML = "";
+    showStatus("Cleared");
+}
+</script>
+</body>
+</html>
