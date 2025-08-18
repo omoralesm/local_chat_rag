@@ -3,6 +3,7 @@ import os
 import requests
 from werkzeug.utils import secure_filename
 from chroma_tasks import load_chroma_documents, clear_chroma_database
+from query_tasks import query_rag
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'D:/LLM/Data'
@@ -31,7 +32,7 @@ def init_db():
     try:
         clear_chroma_database()
         print("Database cleared ✅")
-        return jsonify(success=True, message="Database cleared successfully!")
+        return jsonify(success=True, message="DB iniciada!")
     except Exception as e:
         return jsonify(success=False, message=str(e))
 
@@ -39,7 +40,7 @@ def init_db():
 def upload_pdfs():
     try:
         if 'files' not in request.files:
-            return jsonify(success=False, message="No files provided.")
+            return jsonify(success=False, message="No se enviaron archivos.")
         
         files = request.files.getlist('files')
         saved_files = []
@@ -53,9 +54,9 @@ def upload_pdfs():
 
         if saved_files:
             load_chroma_documents()
-            return jsonify(success=True, message=f"Uploaded {len(saved_files)} PDFs", files=saved_files)
+            return jsonify(success=True, message=f"Se cargaron {len(saved_files)} PDFs", files=saved_files)
         else:
-            return jsonify(success=False, message="No valid PDF uploaded.")
+            return jsonify(success=False, message="No se cargaron PDFs.")
     except Exception as e:
         return jsonify(success=False, message=str(e))
 
@@ -67,12 +68,12 @@ def ask_question():
         use_rag = data.get("use_rag", False)
 
         if not question:
-            return jsonify(success=False, message="No question provided.")
+            return jsonify(success=False, message="No se capturó una pregunta.")
 
-        # If RAG is checked, prepend context
+        # If RAG is checked, preappend context
         if use_rag:
-            rag_context = search_rag(question)
-            prompt = f"Context:\n{rag_context}\n\nQuestion: {question}\nAnswer:"
+            prompt = query_rag(question)
+            print(f"RAG Context: {prompt}")
         else:
             prompt = question
 
@@ -89,7 +90,7 @@ def ask_question():
 
         if response.status_code == 200:
             result = response.json()
-            answer = result.get("content", "⚠️ No answer received.")
+            answer = result.get("content", "⚠️ No se recibió respuesta.")
             return jsonify(success=True, answer=answer)
         else:
             return jsonify(success=False, message=f"LLAMA Server error {response.status_code}")

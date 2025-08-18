@@ -2,25 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Q&A with LLaMA</title>
+  <title>RAG Chat</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <div class="container">
-  <h1>Question & Answer System</h1>
+  <h1>Preguntas y respuestas con RAG</h1>
 
   <div class="top-controls">
-    <button id="initDbBtn">Init DB</button>
+    <button id="initDbBtn">Reinicia DB</button>
     <input type="file" id="pdfInput" accept=".pdf" multiple hidden>
-    <button id="loadPdfBtn">Load PDF</button>
+    <button id="loadPdfBtn">Carga PDF</button>
   </div>
 
   <textarea id="questionInput" rows="4" placeholder="Enter your question here..."></textarea>
 
   <div class="controls">
-    <label><input type="checkbox" id="useRag"> Use RAG</label>
-    <button id="submitBtn">Submit Question</button>
-    <button id="clearBtn">Clear</button>
+    <label><input type="checkbox" id="useRag"> Usar RAG</label>
+    <button id="submitBtn">Preguntar</button>
+    <button id="clearBtn">Limpiar</button>
   </div>
 
   <h3>Response:</h3>
@@ -57,9 +57,9 @@ document.getElementById("pdfInput").addEventListener("change", async (e)=>{
 document.getElementById("submitBtn").onclick = async ()=>{
     const q = document.getElementById("questionInput").value.trim();
     const useRag = document.getElementById("useRag").checked;
-    if (!q) { showStatus("Please enter a question", false); return; }
+    if (!q) { showStatus("Captura una pregunta, por favor", false); return; }
 
-    document.getElementById("responseArea").innerHTML = "⏳ Processing...";
+    document.getElementById("responseArea").innerHTML = "⏳ Procesando...";
     let res = await fetch("/ask_question",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
