@@ -82,8 +82,7 @@ def ask_question():
             LLAMA_SERVER_URL,
             json={
                 "prompt": prompt,
-                "n_predict": 256,
-                "temperature": 0.7
+                "n_predict": 256
             },
             timeout=30
         )

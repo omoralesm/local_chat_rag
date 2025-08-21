@@ -4,14 +4,9 @@ from get_embedding_function import LlamaCppEmbeddingFunction
 CHROMA_PATH = "D:/LLM/Chroma"
 MODEL_EMBEDDING_PATH = "D:/LLM/Models/all-MiniLM-L6-v2.F16.gguf"
 PROMPT_TEMPLATE = """
-You are a helpful assistant who answers questions using only the provided context.
-If you don't know the answer, simply state that you don't know.
-
-{context}
-
----
-
-Question: {question}
+User wants to know [{question}] Use the extracted passages from our knowledge base 
+(below) to form the best answer you can. Show the final answer clearly.
+[{context}]
 """
 
 def query_rag(search_query: str):
